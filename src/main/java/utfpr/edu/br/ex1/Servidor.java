@@ -5,47 +5,47 @@
  */
 package utfpr.edu.br.ex1;
 
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * @author User
  */
 public class Servidor {
 
-    private static ServerSocket servidor;
-    private static Socket conexao;
-    private static DataInputStream entrada;
-    private static DataOutputStream saida;
+//    private static DatagramSocket socket;
+//    private static Socket conexao;
+//    private static DataInputStream entrada;
+//    private static DataOutputStream saida;
+    private static ExecutorService es = Executors.newCachedThreadPool();
 
     public static void main(String[] args) {
+        try (var socket = new DatagramSocket(2000)) {
+//            Servidor.socket = socket;
 
-        try {
-            // receber mensagens
-            servidor = new ServerSocket(2000);
+            System.out.println("SERVIDOR: aceitando conexões UDP na porta 2000");
+
             while (true) {
-                System.out.println("Aguardando conexão...");
-                conexao = servidor.accept();
-                System.out.println("Conexão estabelecida...");
+                var DpReceive = Util.receiveUdpPacket(socket, 0);
+
                 // regra de negocio
-                new Thread(new ThreadServidor(conexao)).start();
+                es.submit(new ThreadServidor(socket, DpReceive));
+//                new Thread(new ThreadServidor(socket, DpReceive)).start();
             }
-        } catch (IOException ex) {
+        } catch(IOException ex){
             Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
 
-    
+
 
 }
